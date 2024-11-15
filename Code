@@ -1,0 +1,242 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <sstream>
+using namespace std;
+
+class Patient {
+    static int idCounter;  // Static counter for unique ID generation
+    int id;
+    string name;
+    int age;
+    string disease;
+    vector<string> history;
+
+public:
+    Patient(string name, int age, string disease)
+        : id(++idCounter), name(name), age(age), disease(disease) {}
+
+    int getId() const { return id; }
+    string getName() const { return name; }
+    int getAge() const { return age; }
+    string getDisease() const { return disease; }
+
+    void addHistory(const string& record) {
+        history.push_back(record);
+    }
+
+    void displayDetails() const {
+        cout << "Patient ID: " << id << "\nName: " << name
+             << "\nAge: " << age << "\nDisease: " << disease
+             << "\nMedical History: ";
+        if (history.empty()) {
+            cout << "No records yet.\n";
+        } else {
+            for (const string& record : history) {
+                cout << record << ", ";
+            }
+            cout << "\n";
+        }
+    }
+
+    string getSummary() const {
+        stringstream ss;
+        ss << "Patient ID: " << id << "\nName: " << name
+           << "\nAge: " << age << "\nDisease: " << disease
+           << "\nMedical History: ";
+        if (history.empty()) {
+            ss << "No records yet.\n";
+        } else {
+            for (const string& record : history) {
+                ss << record << ", ";
+            }
+            ss << "\n";
+        }
+        return ss.str();
+    }
+};
+
+int Patient::idCounter = 0;  // Initialize static counter
+
+class Doctor {
+    static int idCounter;  // Static counter for unique ID generation
+    int id;
+    string name;
+    string specialty;
+
+public:
+    Doctor(string name, string specialty)
+        : id(++idCounter), name(name), specialty(specialty) {}
+
+    int getId() const { return id; }
+    string getName() const { return name; }
+    string getSpecialty() const { return specialty; }
+
+    void displayDetails() const {
+        cout << "Doctor ID: " << id << "\nName: " << name
+             << "\nSpecialty: " << specialty << "\n";
+    }
+};
+
+int Doctor::idCounter = 0;  // Initialize static counter
+
+class Appointment {
+    int patientId;
+    int doctorId;
+    string date;
+    string time;
+
+public:
+    Appointment(int pId, int dId, string date, string time)
+        : patientId(pId), doctorId(dId), date(date), time(time) {}
+
+    void displayDetails() const {
+        cout << "Patient ID: " << patientId
+             << "\nDoctor ID: " << doctorId
+             << "\nDate: " << date << "\nTime: " << time << "\n";
+    }
+};
+
+class Hospital {
+    map<int, Patient*> patients;
+    map<int, Doctor*> doctors;
+    vector<Appointment> appointments;
+
+public:
+    void addPatient() {
+        string name, disease;
+        int age;
+        cout << "Enter Patient Name: ";
+        cin.ignore();
+        getline(cin, name);
+        cout << "Enter Patient Age: ";
+        cin >> age;
+        cout << "Enter Disease: ";
+        cin.ignore();
+        getline(cin, disease);
+
+        Patient* patient = new Patient(name, age, disease);
+        patients[patient->getId()] = patient;
+        cout << "Patient added successfully with ID: " << patient->getId() << "\n";
+    }
+
+    void addDoctor() {
+        string name, specialty;
+        cout << "Enter Doctor Name: ";
+        cin.ignore();
+        getline(cin, name);
+        cout << "Enter Specialty: ";
+        getline(cin, specialty);
+
+        Doctor* doctor = new Doctor(name, specialty);
+        doctors[doctor->getId()] = doctor;
+        cout << "Doctor added successfully with ID: " << doctor->getId() << "\n";
+    }
+
+    void dischargePatient() {
+        int id;
+        cout << "Enter Patient ID to discharge: ";
+        cin >> id;
+        if (patients.find(id) != patients.end()) {
+            cout << "Generating discharge summary...\n";
+            cout << patients[id]->getSummary();
+            delete patients[id];
+            patients.erase(id);
+            cout << "Patient discharged successfully!\n";
+        } else {
+            cout << "Patient not found!\n";
+        }
+    }
+
+    void viewAllPatients() {
+        if (patients.empty()) {
+            cout << "No patients found.\n";
+            return;
+        }
+        cout << "--- All Patients ---\n";
+        for (const auto& entry : patients) {
+            entry.second->displayDetails();
+            cout << "--------------------\n";
+        }
+    }
+
+    void viewAllDoctors() {
+        if (doctors.empty()) {
+            cout << "No doctors found.\n";
+            return;
+        }
+        cout << "--- All Doctors ---\n";
+        for (const auto& entry : doctors) {
+            entry.second->displayDetails();
+            cout << "--------------------\n";
+        }
+    }
+
+    void saveToFile() {
+        ofstream outFile("hospital_data.txt");
+        outFile << "--- Patients ---\n";
+        for (const auto& entry : patients) {
+            outFile << entry.second->getSummary() << "\n";
+        }
+        outFile << "--- Doctors ---\n";
+        for (const auto& entry : doctors) {
+            outFile << "Doctor ID: " << entry.second->getId()
+                    << ", Name: " << entry.second->getName()
+                    << ", Specialty: " << entry.second->getSpecialty() << "\n";
+        }
+        outFile.close();
+        cout << "Data saved successfully!\n";
+    }
+
+    ~Hospital() {
+        for (auto& entry : patients) {
+            delete entry.second;
+        }
+        for (auto& entry : doctors) {
+            delete entry.second;
+        }
+    }
+};
+
+// Main function
+int main() {
+    Hospital hospital;
+    int choice;
+
+    do {
+        cout << "\n--- Hospital Management System ---\n";
+        cout << "1. Add Patient\n2. Add Doctor\n3. Discharge Patient\n";
+        cout << "4. View All Patients\n5. View All Doctors\n6. Save to File\n7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            hospital.addPatient();
+            break;
+        case 2:
+            hospital.addDoctor();
+            break;
+        case 3:
+            hospital.dischargePatient();
+            break;
+        case 4:
+            hospital.viewAllPatients();
+            break;
+        case 5:
+            hospital.viewAllDoctors();
+            break;
+        case 6:
+            hospital.saveToFile();
+            break;
+        case 7:
+            cout << "Exiting...\n";
+            break;
+        default:
+            cout << "Invalid choice! Please try again.\n";
+        }
+    } while (choice != 7);
+
+    return 0;
+}
