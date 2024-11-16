@@ -99,7 +99,7 @@ Contributions are welcome! Please fork the repository and create a pull request 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Authors
-This project was developed by Gourika Makhija (24) and Deeksha Singh (26).
+This project was developed by Gourika Makhija (23) and Deeksha Singh (26).
 
 
 
