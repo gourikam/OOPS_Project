@@ -22,7 +22,7 @@ Programming Language: C++
 
 Paradigm: Object-Oriented Programming (OOP)
 
-IDE: Any C++ IDE like Code::Blocks, Visual Studio, etc.
+IDE: Visual Studio Code
 
 
 
